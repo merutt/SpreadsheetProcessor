@@ -26,8 +26,7 @@ namespace SpreadsheetProcessor
         protected override void OnStart(string[] args)
         {
             timer = new Timer(); 
-            //this.timer.Interval = 3600000; //hourly
-            this.timer.Interval = 10000;
+            this.timer.Interval = 3600000;  //hourly
             this.timer.Elapsed += new System.Timers.ElapsedEventHandler(this.timer_Tick);
             timer.Enabled = true;
             Library.WriteLog("Spreadsheet processor service started");
