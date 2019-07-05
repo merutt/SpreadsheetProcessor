@@ -1,7 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
@@ -10,6 +8,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Timers;
 using System.Configuration;
+using System.Security.Principal;
 using GLAReportMVC;
 
 
@@ -25,11 +24,15 @@ namespace SpreadsheetProcessor
 
         protected override void OnStart(string[] args)
         {
+            var currentUser = WindowsIdentity.GetCurrent().Name;
+            var strInterval = ConfigurationManager.AppSettings["ServiceRunInterval"];
+            var interval = Convert.ToInt32(strInterval);
             timer = new Timer(); 
-            this.timer.Interval = 3600000;  //hourly
+            this.timer.Interval = interval;
             this.timer.Elapsed += new System.Timers.ElapsedEventHandler(this.timer_Tick);
             timer.Enabled = true;
             Library.WriteLog("Spreadsheet processor service started");
+            Library.WriteLog($"Logged in User: {currentUser}");
         }
 
         protected override void OnStop()
@@ -187,7 +190,7 @@ namespace SpreadsheetProcessor
         }
 
 
-        //Handle moving the file after it has been processed
+        //Move the file after it has been processed
         static void MoveFile(string originFolder, string destFolder, string fileName)
         {
             try
@@ -200,7 +203,6 @@ namespace SpreadsheetProcessor
 
                 // Move the file.
                 File.Move(fileName, destFile);
-                //Library.WriteLog(string.Format("{0} was moved to {1}.", originFolder, destFolder));
                 Library.WriteLog($"File {fileName} was moved to {destFolder}");
 
                 // See if the original exists now.
@@ -217,8 +219,6 @@ namespace SpreadsheetProcessor
             {
                 Library.WriteLog($"The process failed: {e.ToString()}");
             }
-
         }
-
     }
 }
